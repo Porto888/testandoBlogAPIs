@@ -1,0 +1,429 @@
+{
+	"info": {
+		"_postman_id": "58e4681f-fe16-4e80-b43f-03d5673ca00d",
+		"name": "Testando API endpoints do Blog",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21378059"
+	},
+	"item": [
+		{
+			"name": "Registro de novo usuário",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Este teste tem deve cadastrar usuario e senha válidos', () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"    const { user } = pm.response.json()\r",
+							"    pm.expect(user).to.not.null\r",
+							"    pm.expect(user.id).to.greaterThan(0) \r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const email = `souza.${new Date().getTime()}@email.com`\r",
+							"pm.collectionVariables.set('userEmail', email)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Guilherme P Souza\",\r\n  \"email\": \"{{userEmail}}\",\r\n  \"password\": \"Senha1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Autenticando Usuário",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const {authorized, token} = pm.response.json()\r",
+							"pm.collectionVariables.set('token', token)\r",
+							"\r",
+							"\r",
+							"pm.test('Estes teste deve autenticar, um usuário com credenciais válidas', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    pm.expect(authorized).to.equal(true)\r",
+							"    pm.expect(token).to.have.length.greaterThan(0)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{userEmail}}\",\r\n  \"password\": \"Senha1234\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Registrar usuário com dados inválidos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Não deve registrar usuário com senha inválida', () => {\r",
+							"    pm.response.to.have.status(400)\r",
+							"    const {messages} = pm.response.json()\r",
+							"    pm.expect(messages[0]).to.equal(\"Password must contain at least 8 characters, 1 uppercase character, and 1 digit\")\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"P Souza\",\r\n  \"email\": \"souzapg@email.com\",\r\n  \"password\": \"000000\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuário com e-mail incorreto",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Não deve registrar usuário com e-mail inválido', () => {\r",
+							"    pm.response.to.have.status(400)\r",
+							"    const { messages } = pm.response.json()\r",
+							"    pm.expect(messages[0]).to.equal(\"Invalid email\")\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"P Souza\",\r\n  \"email\": \"souzapg_email.com\",\r\n  \"password\": \"Porto8888\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Registrando um novo post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const {post} = pm.response.json()\r",
+							"pm.collectionVariables.set('postId', post.id)\r",
+							"\r",
+							"pm.test('Este teste deve registrar um novo post válido', () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"    pm.expect(post).to.not.null\r",
+							"    pm.expect(post.id).to.greaterThan(0)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Learning programming with Go\",\r\n  \"content\": \"Go is a very popular programming language, which is great for learning programming logics.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/posts",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recuperando post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"\r",
+							"pm.test('Este teste deve recuperar um post registrado', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    const {post} = pm.response.json()\r",
+							"    pm.expect(post).to.not.null\r",
+							"    const postId = pm.collectionVariables.get('postId')\r",
+							"    pm.expect(post.id).to.equal(postId)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/posts/{{postId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"{{postId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletar post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Este teste deve deletar post atraves do id', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    const {message} = pm.response.json()\r",
+							"    pm.expect(message).to.equal('Post deleted')\r",
+							"\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/posts/{{postId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"posts",
+						"{{postId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletar usuário",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Este teste deve deletar usuário cadastrado pelo email', () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    const {message} = pm.response.json()\r",
+							"    pm.expect(message).to.equal('User deleted')\r",
+							"\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/{{userEmail}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"{{userEmail}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "userEmail",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "postId",
+			"value": ""
+		}
+	]
+}

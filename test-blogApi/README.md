@@ -12,6 +12,10 @@ Após executar a API, é possível acessar a documentação por meio da url:
 ```
 http://localhost:3000/docs
 ```
+
+Obs: Os testes contidos no arquivo a seguir, contenplam apenas um fração mínima das resquisições de testes que a documentação proporciona.
+
+
 O arquivo `test_api_blog_endpoints.postman_collection.json`, contém os testes reailizados atrvés do Postman.
 
 Para executar o arquivo:
